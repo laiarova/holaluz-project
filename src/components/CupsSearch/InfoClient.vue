@@ -43,9 +43,9 @@ export default {
     offerOptionsAnalyzer(){
       let sumInvoicedAmount = 0.0;
       let lowPower = true;
-      let valor;
+      let error = false;
       for(let i=0; this.supplyPointsClient.neighbors.length >i; i++){
-        valor=getInfoCups(this.$store.state.supplyPoints, this.supplyPointsClient.neighbors[i]);
+        let valor=getInfoCups(this.$store.state.supplyPoints, this.supplyPointsClient.neighbors[i]);
         if(valor){
           //for Special discount
           sumInvoicedAmount += parseFloat(valor.invoiced_amount)
@@ -54,10 +54,11 @@ export default {
             lowPower = false;
           }
         }else{
+          error = true
           break;
         }
       }
-      return valor ? {sumInvoicedAmount, lowPower, error: false} : {error: true}
+      return error ? {error: true} : {sumInvoicedAmount, lowPower, error: false}
     },
   },
   computed:{
