@@ -1,5 +1,6 @@
 <template>
-  <CupsSearch />
+  <p v-if="errorData" class="dataError">Error receiving data</p>
+  <CupsSearch v-else/>
 </template>
 
 <script>
@@ -10,6 +11,11 @@ export default {
   components: {
     CupsSearch
   },
+  computed:{
+    errorData(){
+      return !(Array.isArray(this.$store.state.clients) && Array.isArray(this.$store.state.supplyPoints))
+    }
+  }
 }
 </script>
 
@@ -29,5 +35,8 @@ body{
   width: 70%;
   min-width: 685px;
 
+}
+.dataError{
+  color: #ccc
 }
 </style>

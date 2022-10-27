@@ -1,3 +1,4 @@
 export function getInfoCups (arrayToSearchCups, itemCups){
-    return arrayToSearchCups.find((element) => element.cups === itemCups);
+    const client = arrayToSearchCups.find((element) => element.cups === itemCups);
+    return client ? client : null
 }

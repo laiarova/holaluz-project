@@ -1,6 +1,6 @@
 <template>
   <base-searcher placeholderText="Ex: 123456" @search="searchUser($event)"/>
-  <p v-if="!cupsUserCorrect" class="errorMessage">CUPS has not been found</p>
+  <p v-if="!cupsUserCorrect" class="dataError">CUPS has not been found</p>
   <InfoClient v-else-if="client" :clientInfo="client"/>
   <!--InfoClient v-for="item in $store.state.clients" :key="item.cups" :clientInfo="item"/-->
 </template>
@@ -29,8 +29,4 @@ export default {
 }
 </script>
 
-<style scoped>
-.errorMessage{
-  color: #ccc
-}
-</style>
+

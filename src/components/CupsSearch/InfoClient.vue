@@ -9,7 +9,7 @@
     </div>
     <div class="infoClient infoClientRight">
       <div class="offerType">
-        <b>{{ this.typeOffer[this.offer].name }}</b>
+        <b>{{ typeOffer[offer].name }}</b>
       </div>
       <div class="consumption">
         <p><b>Tariff:</b> {{ supplyPointsClient.tariff ? supplyPointsClient.tariff : 'not found' }}</p>
@@ -19,6 +19,7 @@
       </div>
     </div>
   </base-card>
+  <p v-else-if="!supplyPointsClient" class="dataError">User {{ clientInfo.cups }} cannot be displayed due to a data error</p>
 </template>
 
 <script>
@@ -31,26 +32,32 @@ export default {
   },
   data(){
     return{
-      typeOffer: {'not-offer': {'name':'Not offer','color':'#ff841a'},
-                  'standard-offer':{'name':'Standard offer','color':'#d9d9d9'},
-                  'basic-discount':{'name':'Basic discount','color':'#75ff86'},
-                  'special-discount':{'name':'Special discount','color':'#f5f567'}}
+      typeOffer: {'not-offer': {'name':'Not offer','color':'#d9d9d9'},
+                  'standard-offer':{'name':'Standard offer','color':'#4bf9c0'},
+                  'basic-discount':{'name':'Basic discount','color':'#78ff26'},
+                  'special-discount':{'name':'Special discount','color':'#fff05b'},
+                  'error':{'name':'Error calculating the offer','color':'#f76565'}}
     }
   },
   methods:{
     offerOptionsAnalyzer(){
       let sumInvoicedAmount = 0.0;
       let lowPower = true;
+      let valor;
       for(let i=0; this.supplyPointsClient.neighbors.length >i; i++){
-        //for Special discount
-        let valor=getInfoCups(this.$store.state.supplyPoints, this.supplyPointsClient.neighbors[i]);
-        sumInvoicedAmount += parseFloat(valor.invoiced_amount)
-        //for Basic discount
-        if(parseInt(this.supplyPointsClient.power.p1) < parseInt(valor.power.p1) || parseInt(this.supplyPointsClient.power.p2) < parseInt(valor.power.p2)){
-          lowPower = false;
+        valor=getInfoCups(this.$store.state.supplyPoints, this.supplyPointsClient.neighbors[i]);
+        if(valor){
+          //for Special discount
+          sumInvoicedAmount += parseFloat(valor.invoiced_amount)
+          //for Basic discount
+          if(parseInt(this.supplyPointsClient.power.p1) < parseInt(valor.power.p1) || parseInt(this.supplyPointsClient.power.p2) < parseInt(valor.power.p2)){
+            lowPower = false;
+          }
+        }else{
+          break;
         }
       }
-      return {sumInvoicedAmount, lowPower}
+      return valor ? {sumInvoicedAmount, lowPower, error: false} : {error: true}
     },
   },
   computed:{
@@ -61,8 +68,10 @@ export default {
       if(this.clientInfo.building_type !== 'house' || this.supplyPointsClient.neighbors.length === 0){
         return 'not-offer'
       }
-      let {sumInvoicedAmount, lowPower} = this.offerOptionsAnalyzer()
-
+      let {sumInvoicedAmount, lowPower, error} = this.offerOptionsAnalyzer()
+      if(error){
+        return 'error'
+      }
       if(sumInvoicedAmount > 100){
         return 'special-discount'
       }else if(lowPower){
@@ -71,18 +80,23 @@ export default {
       return 'standard-offer'
     },
     colorTypeOffer(){
-      return this.typeOffer[this.offer].color
+      if(this.supplyPointsClient) {
+        return this.typeOffer[this.offer].color
+      }
+      return null
     },
     numNeighbors(){
-      if(!this.supplyPointsClient.neighbors){
-        return 'no encontrado'
-      }else if(this.supplyPointsClient.neighbors.length >= 2){
-        return this.supplyPointsClient.neighbors.length+' neighbors'
-      }else if(this.supplyPointsClient.neighbors.length === 1){
-        return this.supplyPointsClient.neighbors.length+' neighbor'
-      }else{
+      if(this.supplyPointsClient){
+        if(!this.supplyPointsClient.neighbors){
+          return 'no encontrado'
+        }else if(this.supplyPointsClient.neighbors.length >= 2){
+          return this.supplyPointsClient.neighbors.length+' neighbors'
+        }else if(this.supplyPointsClient.neighbors.length === 1){
+          return this.supplyPointsClient.neighbors.length+' neighbor'
+        }
         return 'has no neighbors'
       }
+      return null
     },
   },
 
